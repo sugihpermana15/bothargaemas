@@ -72,6 +72,167 @@ MAX_RETRIES=3
 RETRY_BACKOFF_BASE_SECONDS=1.5
 ```
 
+## Membuat bot via BotFather (awal sampai jadi)
+
+1) Buka Telegram, cari akun **BotFather**.
+2) Jalankan perintah:
+
+- `/newbot` → ikuti instruksi sampai BotFather memberi **token**.
+
+3) Simpan token itu ke `.env`:
+
+```env
+TELEGRAM_TOKEN=123456:ABCDEF_your_bot_token
+```
+
+4) (Opsional tapi disarankan) Set daftar command di BotFather:
+
+- `/setcommands` → pilih bot → tempel ini:
+
+```text
+cekharga - Cek harga semua vendor (GALERI 24, ANTAM, UBS)
+galeri24 - Cek harga GALERI 24 saja
+antam - Cek harga ANTAM saja
+ubs - Cek harga UBS saja
+```
+
+5) (Opsional) Set deskripsi dan about:
+
+- `/setdescription` → deskripsi panjang
+- `/setabouttext` → intro singkat
+
+Catatan:
+
+- Bot ini memakai **getUpdates (long polling)**. Jangan aktifkan webhook di token yang sama.
+- Jangan jalankan bot di 2 tempat sekaligus (lokal + VPS) dengan token yang sama, nanti bisa conflict `409`.
+
+## Cara mendapatkan TELEGRAM_CHAT_ID
+
+`TELEGRAM_CHAT_ID` adalah ID chat tempat bot boleh merespons command.
+
+### A) Private chat (DM ke bot)
+
+1) Chat bot kamu, kirim pesan apa saja (mis. `test`).
+2) Jalankan perintah ini dari mesin yang sudah punya `TELEGRAM_TOKEN`:
+
+```bash
+curl -s "https://api.telegram.org/bot$TELEGRAM_TOKEN/getUpdates" | head
+```
+
+3) Cari `"chat":{"id": ... }` → itulah chat id yang dipakai.
+
+### B) Group / Supergroup
+
+1) Tambahkan bot ke grup.
+2) Kirim `/cekharga` di grup.
+3) Jalankan `getUpdates` seperti di atas.
+4) Ambil `chat.id`:
+
+- Group biasanya angka negatif.
+- Supergroup biasanya diawali `-100...`.
+
+Jika grup pernah upgrade dari group → supergroup, Telegram bisa mengirim field `migrate_to_chat_id`; gunakan ID supergroup yang baru.
+
+## Menjalankan di VPS Ubuntu (tanpa Docker, 24/7 dengan systemd)
+
+Langkah di bawah diasumsikan VPS Ubuntu 22.04/24.04, dan project akan diletakkan di `/opt/bothargaemas`.
+
+### 1) Install dependency OS
+
+```bash
+sudo apt update
+sudo apt install -y git python3 python3-venv python3-pip
+```
+
+### 2) Clone repository
+
+```bash
+sudo mkdir -p /opt/bothargaemas
+sudo chown -R $USER:$USER /opt/bothargaemas
+cd /opt/bothargaemas
+git clone https://github.com/sugihpermana15/bothargaemas.git .
+```
+
+### 3) Buat virtualenv + install Python packages
+
+```bash
+cd /opt/bothargaemas/emasbot
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 4) Install Playwright Chromium (fallback)
+
+```bash
+python -m playwright install --with-deps chromium
+```
+
+### 5) Buat `.env`
+
+```bash
+cd /opt/bothargaemas/emasbot
+nano .env
+```
+
+Isi minimal:
+
+```env
+TELEGRAM_TOKEN=...
+TELEGRAM_CHAT_ID=...
+```
+
+### 6) Test run manual
+
+```bash
+cd /opt/bothargaemas/emasbot
+source .venv/bin/activate
+python main.py
+```
+
+### 7) Buat service systemd
+
+Buat file:
+
+```bash
+sudo nano /etc/systemd/system/bothargaemas.service
+```
+
+Isi (sesuaikan path bila berbeda):
+
+```ini
+[Unit]
+Description=bothargaemas - Telegram gold price monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/bothargaemas/emasbot
+EnvironmentFile=/opt/bothargaemas/emasbot/.env
+ExecStart=/opt/bothargaemas/emasbot/.venv/bin/python /opt/bothargaemas/emasbot/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Aktifkan:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now bothargaemas
+sudo systemctl status bothargaemas --no-pager
+```
+
+Lihat log:
+
+```bash
+journalctl -u bothargaemas -f
+```
+
 ## Menjalankan di Windows (local)
 
 Jalankan dari folder `emasbot/`.

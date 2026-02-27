@@ -68,6 +68,55 @@ MAX_RETRIES=3
 RETRY_BACKOFF_BASE_SECONDS=1.5
 ```
 
+## Membuat bot via BotFather (awal sampai jadi)
+
+1) Buka Telegram, cari akun **BotFather**.
+2) Jalankan `/newbot` → ikuti instruksi sampai BotFather memberi **token**.
+3) Simpan token ke `.env`:
+
+```env
+TELEGRAM_TOKEN=123456:ABCDEF_your_bot_token
+```
+
+4) (Opsional tapi disarankan) Set daftar command di BotFather:
+
+- `/setcommands` → pilih bot → tempel ini:
+
+```text
+cekharga - Cek harga semua vendor (GALERI 24, ANTAM, UBS)
+galeri24 - Cek harga GALERI 24 saja
+antam - Cek harga ANTAM saja
+ubs - Cek harga UBS saja
+```
+
+Catatan:
+
+- Bot ini memakai **getUpdates (long polling)**. Jangan aktifkan webhook di token yang sama.
+- Jangan jalankan bot di 2 tempat sekaligus (lokal + VPS) dengan token yang sama, nanti bisa conflict `409`.
+
+## Cara mendapatkan TELEGRAM_CHAT_ID
+
+`TELEGRAM_CHAT_ID` adalah ID chat tempat bot boleh merespons command.
+
+### A) Private chat (DM ke bot)
+
+1) Chat bot kamu, kirim pesan apa saja.
+2) Panggil `getUpdates` dan ambil `chat.id`.
+
+Contoh cepat (Linux/VPS):
+
+```bash
+curl -s "https://api.telegram.org/bot$TELEGRAM_TOKEN/getUpdates" | head
+```
+
+### B) Group / Supergroup
+
+1) Tambahkan bot ke grup.
+2) Kirim `/cekharga` di grup.
+3) Panggil `getUpdates` dan ambil `chat.id`.
+
+Jika grup upgrade ke supergroup, Telegram bisa mengirim `migrate_to_chat_id`; gunakan ID supergroup yang baru.
+
 ## Setup Ubuntu VPS (Python 3.10+) sampai running
 
 Langkah di bawah diasumsikan Anda berada di VPS Ubuntu dan project ada di `~/emasbot`.
