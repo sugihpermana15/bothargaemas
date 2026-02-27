@@ -275,7 +275,7 @@ Project ini bisa dijalankan sebagai container background (tanpa port HTTP).
 
 ### 1) Siapkan folder + `.env`
 
-Di folder yang berisi `docker-compose.yml` dan `Dockerfile`, buat file `.env`:
+Buat file `.env` di folder `emasbot/` (satu folder dengan `main.py`):
 
 ```env
 TELEGRAM_TOKEN=...
@@ -291,6 +291,7 @@ RETRY_BACKOFF_BASE_SECONDS=1.5
 ### 2) Build & run
 
 ```bash
+cd /srv/hargaemas
 docker compose up -d --build
 ```
 

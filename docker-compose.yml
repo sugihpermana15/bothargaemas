@@ -6,9 +6,9 @@ services:
     container_name: emasbot
     restart: unless-stopped
 
-    # Load secrets/config from .env next to this compose file (DO NOT commit .env)
+    # Load secrets/config from .env next to main.py (DO NOT commit .env)
     env_file:
-      - .env
+      - ./emasbot/.env
 
     environment:
       # Persist DB to a bind-mounted folder
