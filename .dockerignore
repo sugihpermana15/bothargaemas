@@ -1,0 +1,25 @@
+# VCS
+.git
+
+# Python caches
+__pycache__
+*.pyc
+
+# Virtualenvs
+.venv
+emasbot/.venv
+
+# Secrets
+.env
+emasbot/.env
+
+# Local data
+*.db
+data
+emasbot.db
+emasbot/emasbot.db
+emasbot/emasbot.lock
+
+# Misc
+Thumbs.db
+.DS_Store

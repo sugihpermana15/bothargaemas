@@ -1,0 +1,26 @@
+services:
+  emasbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emasbot
+    restart: unless-stopped
+
+    # Load secrets/config from .env next to this compose file (DO NOT commit .env)
+    env_file:
+      - .env
+
+    environment:
+      # Persist DB to a bind-mounted folder
+      DB_PATH: /data/emasbot.db
+
+      # Optional defaults (can be overridden in .env)
+      POLL_INTERVAL_SECONDS: "${POLL_INTERVAL_SECONDS:-30}"
+      REQUEST_TIMEOUT_SECONDS: "${REQUEST_TIMEOUT_SECONDS:-15}"
+      MAX_RETRIES: "${MAX_RETRIES:-3}"
+      RETRY_BACKOFF_BASE_SECONDS: "${RETRY_BACKOFF_BASE_SECONDS:-1.5}"
+
+    volumes:
+      - ./data:/data
+
+    # No ports: not a web service
