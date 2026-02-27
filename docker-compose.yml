@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: emasbot
+    container_name: emasbot5
     restart: unless-stopped
 
     # Load secrets/config from .env next to main.py (DO NOT commit .env)

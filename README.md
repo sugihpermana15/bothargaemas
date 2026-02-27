@@ -300,6 +300,8 @@ docker compose up -d --build
 ```bash
 docker compose ps
 docker compose logs -f emasbot
+# atau jika pakai nama container custom:
+docker logs -f emasbot5
 ```
 
 Catatan:
